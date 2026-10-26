@@ -24,8 +24,22 @@ PLOEGEN = {
 }
 ONS = "Golazo Haasrode Leuven A"
 
+CLUB_URL = "https://www.volleyscores.be/direct/VB-0122"
 TEAM_URL = ("https://www.volleyscores.be/index.php?v=2&ss=0&isActiveSeason=1&t=Ploeg&a=t"
-            "&pi=&si=&ti={id}&ci=&mm=&ssi=&st=&w=%25&f=&lng=nl")
+            "&se={se}&pi=&si=&ti={id}&ci=&mm=&ssi=&st=&w=%25&f=&lng=nl")
+SEIZOEN_FALLBACK = "13"  # 2026-2027
+
+
+def huidig_seizoen():
+    """Seizoens-ID staat als <input data-gt="se" value=".."> op de clubpagina."""
+    try:
+        html = requests.get(CLUB_URL, headers=UA, timeout=30).text
+        m = re.search(r'data-gt="se"[^>]*value="(\d+)"', html) or re.search(r'value="(\d+)"[^>]*data-gt="se"', html)
+        if m:
+            return m.group(1)
+    except requests.RequestException as e:
+        print(f"waarschuwing: clubpagina niet opgehaald ({e})")
+    return SEIZOEN_FALLBACK
 ICS_URL = "https://www.volleyscores.be/calendar/team/{id}"
 
 
@@ -72,9 +86,11 @@ def parse_ics(text):
 
 
 def main():
+    se = huidig_seizoen()
+    print(f"seizoen-ID: {se}")
     data = {"bijgewerkt": datetime.now(BXL).isoformat(timespec="minutes"), "ploegen": {}}
     for key, p in PLOEGEN.items():
-        r = requests.get(TEAM_URL.format(id=p["team_id"]), headers=UA, timeout=30)
+        r = requests.get(TEAM_URL.format(se=se, id=p["team_id"]), headers=UA, timeout=30)
         r.raise_for_status()
         wedstrijden = parse_teampagina(r.text)
         if len(wedstrijden) < 5:
