@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="nl-BE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Sansita&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0d0d; --wit:#ffffff; --zacht:#a3a6a6; --lijn:#2a2c2c; --vlak:#17191a; --licht:#efebeb;
+  --win:#7fd8a0; --verlies:#ef8f86;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg)}
+body{color:var(--wit);font:300 15px/1.5 Roboto,Arial,sans-serif;letter-spacing:.3px;font-feature-settings:"tnum" 1;padding:4px 0 8px}
+.label{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--zacht)}
+
+/* Volgende wedstrijd */
+.volgende{border:1px solid var(--lijn);background:var(--vlak);padding:22px 24px;margin-bottom:28px}
+.volgende .duel{font-family:Sansita,Georgia,serif;font-size:30px;line-height:1.15;margin:10px 0 12px}
+.volgende .duel .tegen{color:var(--zacht);margin:0 .3em}
+.volgende .info{display:flex;flex-wrap:wrap;gap:4px 22px;font-size:15px}
+.volgende .info b{font-weight:500}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border:1px solid var(--zacht);color:var(--zacht);vertical-align:2px}
+.tag.thuis{background:var(--licht);border-color:var(--licht);color:#000}
+
+/* Tabs */
+.tabs{display:flex;gap:28px;border-bottom:1px solid var(--lijn);margin-bottom:6px}
+.tabs button{background:none;border:0;cursor:pointer;color:var(--zacht);font:700 12px Roboto,Arial,sans-serif;letter-spacing:3px;text-transform:uppercase;padding:12px 0;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--wit);border-bottom-color:var(--wit)}
+.tabs button:focus-visible{outline:1px solid var(--wit);outline-offset:4px}
+
+/* Lijst */
+.maand{margin:22px 0 4px}
+.rij{display:grid;grid-template-columns:96px 1fr 120px;gap:16px;align-items:center;padding:13px 0;border-bottom:1px solid var(--lijn)}
+.datum b{display:block;font-weight:500;white-space:nowrap}
+.datum span{color:var(--zacht);font-size:13px}
+.ploegen{font-size:15px;line-height:1.35}
+.ploegen .ons{font-weight:500}
+.ploegen .tegen{color:var(--zacht);margin:0 .25em}
+.zaal{font-size:13px;color:var(--zacht);margin-top:2px}
+.rechts{text-align:right}
+.score{font-family:Sansita,Georgia,serif;font-size:22px;line-height:1}
+.wv{display:inline-block;font:700 11px Roboto,Arial,sans-serif;letter-spacing:1px;width:20px;height:20px;line-height:20px;text-align:center;margin-left:8px;vertical-align:3px}
+.wv.w{background:var(--win);color:#000}
+.wv.v{background:var(--verlies);color:#000}
+.sets{display:block;font-size:12px;color:var(--zacht);margin-top:4px;white-space:nowrap}
+.volgt{font-size:13px;color:var(--zacht)}
+.leeg{padding:28px 0;color:var(--zacht)}
+footer{margin-top:18px;font-size:12px;color:var(--zacht);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+footer a{color:var(--zacht)}
+
+@media (max-width:600px){
+  .volgende{padding:18px}
+  .volgende .duel{font-size:23px}
+  .rij{grid-template-columns:62px 1fr;gap:4px 12px}
+  .rechts{grid-column:2;text-align:left}
+  .rechts .sets{display:inline;margin-left:10px}
+  .tabs{gap:20px}
+}
+</style>
+</head>
+<body>
+<section class="volgende" id="volgende" aria-label="Volgende wedstrijd"></section>
+<div class="tabs" role="tablist">
+  <button role="tab" id="t-komend" aria-selected="true">Kalender</button>
+  <button role="tab" id="t-gespeeld" aria-selected="false">Uitslagen</button>
+</div>
+<section id="lijst"></section>
+<footer><span id="bijgewerkt"></span><a href="https://www.volleyscores.be/" target="_blank" rel="noopener">Bron: volleyscores.be</a></footer>
+
+<script>
+/*__DATA__*/
+const KORT={"Golazo Haasrode Leuven A":"Golazo Haasrode Leuven"};
+const naam=n=>KORT[n]||n.replace(/ A$/,"");
+const TZ={timeZone:"Europe/Brussels"};
+const dagnamen=["zo","ma","di","wo","do","vr","za"];
+
+function render(DATA){
+  const ploegKey=(new URLSearchParams(location.search).get("ploeg")||"heren").toLowerCase();
+  const P=DATA.ploegen[ploegKey]||DATA.ploegen.heren;
+  const ons=P.ons;
+  const parse=([code,datum,uur,thuis,uit,zaal,uitslag,sets])=>{
+    const [d,m,y]=datum.split("/").map(Number);const [h,mi]=uur.split(":").map(Number);
+    // lokale Belgische tijd → Date (offset zomer/winter via Intl)
+    const guess=new Date(Date.UTC(y,m-1,d,h,mi));
+    const off=new Date(guess.toLocaleString("en-US",TZ))-new Date(guess.toLocaleString("en-US",{timeZone:"UTC"}));
+    return {code,d:new Date(guess-off),dag:dagnamen[new Date(Date.UTC(y,m-1,d)).getUTCDay()],dm:`${d}/${m}`,uur,thuis,uit,zaal,uitslag,sets,beker:/^BC/.test(code)};
+  };
+  const nu=Date.now();
+  const alle=P.wedstrijden.map(parse).sort((a,b)=>a.d-b.d);
+  const isGespeeld=w=>!!w.uitslag||w.d.getTime()+3*3600e3<nu;
+  const gespeeld=alle.filter(isGespeeld), komend=alle.filter(w=>!isGespeeld(w));
+  const isThuis=w=>w.thuis===ons;
+  const pl=n=>n===ons?`<span class="ons">${naam(n)}</span>`:naam(n);
+  const maand=w=>w.d.toLocaleDateString("nl-BE",{...TZ,month:"long",year:"numeric"});
+
+  const v=komend[0], el=document.getElementById("volgende");
+  el.innerHTML = v ? `
+    <div class="label">Volgende wedstrijd${v.beker?" · Beker van België":""}</div>
+    <div class="duel">${naam(v.thuis)}<span class="tegen">–</span>${naam(v.uit)}</div>
+    <div class="info"><span><span class="tag ${isThuis(v)?"thuis":""}">${isThuis(v)?"Thuis":"Uit"}</span></span>
+      <span><b>${v.dag} ${v.dm}</b> om ${v.uur}</span><span>${v.zaal}</span></div>`
+    : `<div class="label">Volgende wedstrijd</div><div class="duel">Het seizoen zit erop</div>`;
+
+  function rij(w){
+    let r;
+    if(w.uitslag){
+      const [h,a]=w.uitslag.split("-").map(s=>+s.trim());
+      const win=isThuis(w)?h>a:a>h;
+      r=`<span class="score">${h}–${a}</span><span class="wv ${win?"w":"v"}" title="${win?"Gewonnen":"Verloren"}">${win?"W":"V"}</span>${w.sets?`<span class="sets">${w.sets.replace(/\//g,"-")}</span>`:""}`;
+    } else if(isGespeeld(w)) r=`<span class="volgt">uitslag volgt</span>`;
+    else r=`<span class="tag ${isThuis(w)?"thuis":""}">${isThuis(w)?"Thuis":"Uit"}</span>`;
+    return `<div class="rij">
+      <div class="datum"><b>${w.dag} ${w.dm}</b><span>${w.uur}</span></div>
+      <div><div class="ploegen">${pl(w.thuis)}<span class="tegen">–</span>${pl(w.uit)}</div>
+        <div class="zaal">${w.beker?"Beker van België · ":""}${w.zaal}</div></div>
+      <div class="rechts">${r}</div></div>`;
+  }
+  function lijst(welke){
+    const items=welke==="komend"?komend:[...gespeeld].reverse();
+    const el=document.getElementById("lijst");
+    if(!items.length){el.innerHTML=`<p class="leeg">${welke==="komend"?"Geen wedstrijden meer gepland.":"Nog geen gespeelde wedstrijden."}</p>`;return;}
+    let h="",m="";
+    items.forEach(w=>{const mm=maand(w);if(mm!==m){h+=`<div class="label maand">${mm}</div>`;m=mm;}h+=rij(w);});
+    el.innerHTML=h;
+  }
+  const tab=welke=>{
+    document.getElementById("t-komend").setAttribute("aria-selected",welke==="komend");
+    document.getElementById("t-gespeeld").setAttribute("aria-selected",welke==="gespeeld");
+    lijst(welke);
+  };
+  document.getElementById("t-komend").onclick=()=>tab("komend");
+  document.getElementById("t-gespeeld").onclick=()=>tab("gespeeld");
+  const b=new Date(DATA.bijgewerkt);
+  document.getElementById("bijgewerkt").textContent="Bijgewerkt "+b.toLocaleString("nl-BE",{...TZ,day:"numeric",month:"numeric",hour:"2-digit",minute:"2-digit"});
+  tab("komend");
+}
+if(typeof DATA!=="undefined") render(DATA);
+else fetch("data.json",{cache:"no-store"}).then(r=>r.json()).then(render);
+</script>
+</body>
+</html>
