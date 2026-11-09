@@ -1,5 +1,5 @@
 {
- "bijgewerkt": "2026-11-07T22:45+01:00",
+ "bijgewerkt": "2026-11-09T02:42+01:00",
  "ploegen": {
   "heren": {
    "naam": "Heren A",
@@ -7,24 +7,14 @@
    "ons": "Golazo Haasrode Leuven A",
    "wedstrijden": [
     [
-     "LIGH-16",
-     "04/11/2026",
-     "20:30",
+     "LIGH-30",
+     "15/11/2026",
+     "18:00",
      "Golazo Haasrode Leuven A",
-     "Decospan Volley Team Menen A",
+     "VC Greenyard Maaseik A",
      "Leuven, Sportoase Philipssite",
-     "0 - 3",
-     "23/25, 25/27, 19/25"
-    ],
-    [
-     "LIGH-22",
-     "07/11/2026",
-     "20:30",
-     "SAB Diving Brabo Antwerp VT A",
-     "Golazo Haasrode Leuven A",
-     "Deurne, Sporthal Arena",
-     "0 - 3",
-     "15/25, 18/25, 23/25"
+     null,
+     null
     ],
     [
      "LIGH-04",
@@ -57,14 +47,24 @@
      "25/15, 25/17, 25/11"
     ],
     [
-     "LIGH-30",
-     "15/11/2026",
-     "18:00",
+     "LIGH-16",
+     "04/11/2026",
+     "20:30",
      "Golazo Haasrode Leuven A",
-     "VC Greenyard Maaseik A",
+     "Decospan Volley Team Menen A",
      "Leuven, Sportoase Philipssite",
-     null,
-     null
+     "0 - 3",
+     "23/25, 25/27, 19/25"
+    ],
+    [
+     "LIGH-22",
+     "07/11/2026",
+     "20:30",
+     "SAB Diving Brabo Antwerp VT A",
+     "Golazo Haasrode Leuven A",
+     "Deurne, Sporthal Arena",
+     "0 - 3",
+     "15/25, 18/25, 23/25"
     ],
     [
      "LIGH-32",
@@ -214,14 +214,14 @@
    "ons": "Golazo Haasrode Leuven A",
    "wedstrijden": [
     [
-     "NAT1D-0037",
-     "07/11/2026",
+     "NAT1D-0053",
+     "14/11/2026",
      "20:30",
-     "Grinta Valentino Lint A",
      "Golazo Haasrode Leuven A",
-     "Lint, Centrum De Witte Merel zaal A",
-     "1 - 3",
-     "21/25, 25/23, 22/25, 27/29"
+     "Limal Ottignies Smashing A",
+     "Haasrode, Sportcomplex",
+     null,
+     null
     ],
     [
      "NAT1D-0004",
@@ -274,14 +274,14 @@
      "24/26, 19/25, 25/17, 18/25"
     ],
     [
-     "NAT1D-0053",
-     "14/11/2026",
+     "NAT1D-0037",
+     "07/11/2026",
      "20:30",
+     "Grinta Valentino Lint A",
      "Golazo Haasrode Leuven A",
-     "Limal Ottignies Smashing A",
-     "Haasrode, Sportcomplex",
-     null,
-     null
+     "Lint, Centrum De Witte Merel zaal A",
+     "1 - 3",
+     "21/25, 25/23, 22/25, 27/29"
     ],
     [
      "NAT1D-0113",
